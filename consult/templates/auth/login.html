@@ -1,0 +1,53 @@
+{% extends 'auth/base.html' %}
+
+{% block title %}Login{% endblock title %}
+
+{% block form_title %}Login{% endblock form_title %}
+
+{% block form_actions %}
+<button class="btn btn-large btn-primary" type="submit">Login</button>
+or <a href="/register/">Sign up</a> {# TODO: pouzit metodu url_for, aby nebylo url pevne zakodovane!!! #}
+{% endblock form_actions %}
+
+{% block page %}
+
+<div class="container">
+
+	{% include 'messages.html' %}
+
+	<div class="login">
+	  <div class="login-screen">
+	    <div class="login-icon">
+	      <h4>Welcome to <small>Intiny</small></h4>
+	    </div>
+
+	    <div class="login-form">
+
+
+
+
+	        <form action="" method="post" enctype="multipart/form-data">
+
+
+	          <div class="control-group">
+	            <input id="email" name="email" type="text" class="login-field" value="" placeholder="Enter your email" id="login-name">
+	            <label class="login-field-icon fui-man-16" for="login-name"></label>
+	          </div>
+
+	          <div class="control-group">
+	            <input id="password" name="password" type="password" class="login-field" value="" placeholder="Password" id="login-pass">
+	            <label class="login-field-icon fui-lock-16" for="login-pass"></label>
+	          </div>
+
+	          <button class="btn btn-primary btn-large btn-block" type="submit">Login</button>
+	          <!-- <a class="login-link" href="#">Lost your password?</a> -->
+	        </div>
+
+	      </form>
+	  </div>
+	</div>
+
+</div>
+
+{% endblock page %}
+

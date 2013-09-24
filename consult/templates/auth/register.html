@@ -1,0 +1,11 @@
+{% extends 'auth/base.html' %}
+
+{% block title %}Sign up{% endblock title %}
+
+{% block form_title %}Sign up{% endblock form_title %}
+
+{% block form_actions %}
+<button type="submit" class="btn btn-primary btn-large">Sign up</button>
+or <a href="/login/">Login</a> {# TODO: pouzit metodu url_for, aby nebylo url pevne zakodovane!!! #}
+{% endblock form_actions %}
+
