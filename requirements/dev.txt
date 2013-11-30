@@ -2,12 +2,19 @@
 -r prod.txt
 
 # Testing
-nose
-should-dsl
-pinocchio
-behave
-splinter
+coverage==3.6
+pep8==1.4.5
+pylint==0.27.0
 flake8
+pyflakes
+mccabe
+splinter
 unittest2
 ipython
-Flask-Testing
+mock==1.0.1
+factory_boy==2.2.1
+pytest==2.4.2
+pytest-cov==1.6
+pytest-bdd==0.6.4
+pytest-bdd-splinter==0.5.9
+#pytest-konira==0.2
