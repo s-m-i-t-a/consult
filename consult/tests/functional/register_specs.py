@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+'''
+Feature: Register anonymous user
+    As anonymous user
+    I want register
+    Then I can sign in my account
+'''
 
 import re
 
 import pytest
-
-from functools import partial
-
-from pytest_bdd import scenario, given, when, then
 
 
 # XXX: from tests.factories not work, because import colliding with other package
@@ -15,85 +17,126 @@ from ..factories import UserFactory
 
 pytestmark = pytest.mark.usefixtures("db")
 
-scenario = partial(scenario, 'register.feature')
-test_register_known_user = scenario('Register konwn user')
-test_register_unknown_user = scenario('Register unknown user')
-
 
 REGISTER_URL = '/register/'
 
 
-@given('I visit register page')
-def visit_register_page(browser, live_server):
+def test_register_known_user(live_server, browser):
+    '''
+    Scenario: Register konwn user
+    '''
+    # Given I visit register page
     browser.visit(live_server + REGISTER_URL)
 
+    # And system have stored user with email "user@example.org" and password "vimnevim"
+    user = {
+        'email': 'user@example.org',
+        'password': 'vimnevim'
+    }
 
-@given(re.compile('I fill form with email "(?P<email>\w+@\w+\.\w+)" and password "(?P<password>\w+)"'))
-def registred_user(browser, email, password):
-    browser.fill('email', email)
+    UserFactory(email=user['email'], password=user['password'])
+
+    # And I fill form with email "user@example.org" and password "nevim_heslo123"
+    password = 'nevim_heslo123'
+    browser.fill('email', user['email'])
     browser.fill('password', password)
     browser.fill('password_again', password)
 
-    #registred_user = {'email': email, 'password': password}
-    #print registred_user
-    #return registred_user
-
-
-@when(re.compile('I click in button "(?P<button>.*)"'))
-def i_click_on_button(browser, button):
-    #btn = browser.find_by_tag("button")
-    btn = browser.find_by_xpath('//button[text()="%s"]' % button)
+    # When I click in button "Sign up"
+    btn = browser.find_by_xpath('//button[text()="Sign up"]')
     btn.first.click()
 
-
-@then(re.compile('I see page with message "(?P<message>.*)\.\.\."'))
-def i_see_page_with_message(browser, message):
-    assert browser.is_text_present(message)
+    # Then I see same page with message "Correct your registration data and please try again."
+    assert browser.is_text_present("Correct your registration data and please try again.")
 
 
-@then('system save user into database')
-def system_save_user_into_database():
+def test_register_unknown_user(live_server, browser):
+    '''
+    Scenario: Register unknown user
+    '''
+    # Given I visit register page
+    browser.visit(live_server + REGISTER_URL)
+
+    # And I fill form with email "user@example.org" and password "nevim_heslo123"
+    password = 'nevim_heslo123'
+    browser.fill('email', 'user@example.org')
+    browser.fill('password', password)
+    browser.fill('password_again', password)
+
+    # When I click in button "Sign up"
+    btn = browser.find_by_xpath('//button[text()="Sign up"]')
+    btn.first.click()
+
+    # Then I see page with message "Thank you,..."
+    assert browser.is_text_present("Thank you,")
+
+    # And system save user into database
     from flask_musers.models import User
-
     assert len(User.objects) == 1
-    #users = User.objects.filter(email=registred_user['email'])
-    #assert len(users) == 1
-
-    #user = users[0]
-    #assert user.check_password(registred_user['password'])
 
 
-@given(re.compile('system have stored user with email "(?P<email>\w+@\w+\.\w+)" and password "(?P<password>\w+)"'))
-def stored_user(email, password):
-    user = {
-        'email': email,
-        'password': password
-    }
+def test_register_user_with_wrong_email(live_server, browser):
+    '''
+    Scenario: Register unknown user with wrong email
+    '''
 
-    UserFactory(email=email, password=password)
+    # Given I visit register page
+    browser.visit(live_server + REGISTER_URL)
 
-    return user
+    # And I fill form with email "nevim" and password "heslo123"
+    password = 'heslo123'
+    browser.fill('email', 'nevim')
+    browser.fill('password', password)
+    browser.fill('password_again', password)
 
+    # When I click in button "Sign up"
+    btn = browser.find_by_xpath('//button[text()="Sign up"]')
+    btn.first.click()
 
-@then(re.compile('I see same page with message "(?P<message>.*)"'))
-def i_see_page_with_message_second(browser, message):
+    # Then I see same page with message "Enter a valid e-mail address."
     assert browser.url.find(REGISTER_URL) > -1
-    assert browser.is_text_present(message, wait_time=10)
+    assert browser.is_text_present('Enter a valid e-mail address.', wait_time=10)
 
 
-#@given('I fill form without email and password "{password}"')
-#def i_not_fill_email(context, password):
-    #context.browser.fill('password', password)
-    #context.browser.fill('password_again', password)
+def test_register_user_with_empty_email_field(live_server, browser):
+    '''
+    Scenario: Register unknown user with empty email
+    '''
+
+    # Given I visit register page
+    browser.visit(live_server + REGISTER_URL)
+
+    # And I fill form without email and password "heslo123"
+    password = 'heslo123'
+    browser.fill('email', '')
+    browser.fill('password', password)
+    browser.fill('password_again', password)
+
+    # When I click in button "Sign up"
+    btn = browser.find_by_xpath('//button[text()="Sign up"]')
+    btn.first.click()
+
+    # Then I see same page with message "This field is required."
+    assert browser.url.find(REGISTER_URL) > -1
+    assert browser.is_text_present('This field is required.', wait_time=10)
 
 
-#@given('I fill form with email "{email}" and empty password')
-#def i_fill_email(context, email):
-    #context.browser.fill('email', email)
+def test_register_user_with_different_passwords(live_server, browser):
+    '''
+    Scenario: Register unknown user with different passwords
+    '''
+    # Given I visit register page
+    browser.visit(live_server + REGISTER_URL)
 
+    # And I fill form with email "nevim@nevim.cz" and first password "heslo123" and second password "321olseh"
+    browser.fill('email', 'nevim@nevim.cz')
+    browser.fill('password', 'heslo123')
+    browser.fill('password_again', '321olseh')
 
-#@given('I fill form with email "{email}" and first password "{password}" and second password "{password_again}"')
-#def i_fill_different_passwords(context, email, password, password_again):
-    #context.browser.fill('email', email)
-    #context.browser.fill('password', password)
-    #context.browser.fill('password_again', password_again)
+    # When I click in button "Sign up"
+    btn = browser.find_by_xpath('//button[text()="Sign up"]')
+    btn.first.click()
+
+    # Then I see same page with message "Passwords is not equal!"
+    assert browser.url.find(REGISTER_URL) > -1
+    assert browser.is_text_present('Passwords is not equal!', wait_time=10)

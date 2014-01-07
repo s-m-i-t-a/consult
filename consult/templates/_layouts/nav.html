@@ -20,5 +20,13 @@
       <li class="active"><a href="{{ url_for('staticpages.home') }}">Home</a></li>
       <li><a href="{{ url_for('staticpages.about') }}">About</a></li>
     </ul>
+
+    {% if current_user.is_authenticated() %}
+    <p class="navbar-text navbar-right">Signed in as <a href="{{ url_for('dashboard.dashboard') }}" class="navbar-link">{{ current_user }}</a>, <a href="{{ url_for('auth.logout') }}" class="navbar-link">Logout</a></p>
+    {% else %}
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+    </ul>
+    {% endif %}
   </div><!-- /.navbar-collapse -->
 </nav>

@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
 
+import six
+
 import os
 import socket
 import sys
 import time
-import urlparse
+
+if six.PY3:
+    from urllib import parse as urlparse
+else:
+    import urlparse
+
 import urllib
 
 import pytest
 
+
 from multiprocessing import Process
 from mongoengine import signals
 
-from app import app as application, db as database
+from consult import create_app, db as database
 
 
-# HOTFIX: #19 - when object is created, call ensure_indexes,
+# XXX: when object is created, call ensure_indexes,
 # then indexes is set on recreated database.
 def ensure_indexes(sender, document, **kwargs):
     document.ensure_indexes()
@@ -24,14 +32,17 @@ signals.pre_init.connect(ensure_indexes)
 
 
 class Db(object):
+    def __init__(self, application):
+        self.application = application
+
     def clean(self):
         # XXX: sice smaze vsechny data, ale pri tvorbe nove dtb uz nevytvori spravne indexy
         # smazeme vsechny vytvorene kolekce
-        dtb = database.connection[application.config['MONGODB_SETTINGS']['DB']]
-        if (application.config['MONGODB_SETTINGS']['USER'] and
-                application.config['MONGODB_SETTINGS']['PASSWORD']):
-            dtb.authenticate(application.config['MONGODB_SETTINGS']['USER'],
-                             application.config['MONGODB_SETTINGS']['PASSWORD'])
+        dtb = database.connection[self.application.config['MONGODB_SETTINGS']['DB']]
+        if (self.application.config['MONGODB_SETTINGS']['USER'] and
+                self.application.config['MONGODB_SETTINGS']['PASSWORD']):
+            dtb.authenticate(self.application.config['MONGODB_SETTINGS']['USER'],
+                             self.application.config['MONGODB_SETTINGS']['PASSWORD'])
 
         for name in dtb.collection_names():
             if not name.startswith('system'):
@@ -39,27 +50,39 @@ class Db(object):
 
 
 @pytest.fixture
-def db(request):
-    db = Db()
+def app(request):
+    app = create_app('Testing')
+
+    # Establish an application context before running the tests.
+    ctx = app.app_context()
+    ctx.push()
+
+    def teardown():
+        ctx.pop()
+
+    request.addfinalizer(teardown)
+
+    return app
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+@pytest.fixture
+def db(request, app):
+    db = Db(application=app)
 
     request.addfinalizer(db.clean)
 
     return db
 
 
-@pytest.fixture
-def app():
-    return application
-
-
-@pytest.fixture
-def client():
-    return application.test_client()
-
-
 class Server(object):
 
-    def __init__(self):
+    def __init__(self, application):
+        self.application = application
         self.schema = 'http'
         self.host = 'localhost'
         self.port = self._get_free_port()
@@ -73,10 +96,10 @@ class Server(object):
         sys.stderr.close()
         sys.stderr = sys.stdout
 
-        application.run(host=host, port=port)
+        self.application.run(host=host, port=port)
 
     def _get_free_port(self, base_port=5555):
-        for i in xrange(50000):
+        for i in range(50000):
             port = base_port + i
             try:
                 test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -143,8 +166,8 @@ class Server(object):
 
 
 @pytest.fixture(scope='session')
-def live_server(request, db):
-    server = Server()
+def live_server(request, app, db):
+    server = Server(application=app)
 
     request.addfinalizer(server.stop)
 

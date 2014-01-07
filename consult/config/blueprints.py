@@ -15,3 +15,6 @@ def register_blueprints(app):
 
     from staticpages.blueprints import staticpages
     app.register_blueprint(staticpages)
+
+    from dashboard.blueprints import dashboard
+    app.register_blueprint(dashboard)

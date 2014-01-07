@@ -2,8 +2,8 @@
 -r prod.txt
 
 # Testing
-coverage==3.6
-pep8==1.4.5
+coverage==3.7.1
+pep8==1.5.6
 pylint==0.27.0
 flake8
 pyflakes
@@ -11,10 +11,11 @@ mccabe
 splinter
 unittest2
 ipython
+selenium
 mock==1.0.1
-factory_boy==2.2.1
-pytest==2.4.2
+factory_boy==2.3.1
+pytest==2.5.2
 pytest-cov==1.6
-pytest-bdd==0.6.4
-pytest-bdd-splinter==0.5.9
+pytest-bdd==2.1.0
+pytest-splinter==1.0.3
 #pytest-konira==0.2
