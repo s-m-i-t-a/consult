@@ -19,3 +19,4 @@ pytest-cov==1.6
 pytest-bdd==2.1.0
 pytest-splinter==1.0.3
 #pytest-konira==0.2
+tox
