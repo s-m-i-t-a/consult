@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from flask_cbv.views.generic import View
+from flask import Blueprint, render_template
 
 
-class DashboardView(View):
-    template = 'dashboard/index.html'
+dashboard = Blueprint('dashboard', __name__)
+
+
+@dashboard.route('/', endpoint='dashboard', methods=['GET'])
+def index():
+    render_template('dashboard/index.html')
