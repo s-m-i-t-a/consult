@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from flask_cbv.views.generic import View
+from flask import Blueprint, render_template
 
 
-class HomeView(View):
-    template = 'home.html'
+staticpages = Blueprint('staticpages', __name__)
 
 
-class AboutView(View):
-    template = 'about.html'
+@staticpages.route('/', endpoint='home', methods=['GET'])
+def index():
+    return render_template('home.html')
+
+
+@staticpages.route('/about', endpoint='about', methods=['GET'])
+def about():
+    return render_template('about.html')

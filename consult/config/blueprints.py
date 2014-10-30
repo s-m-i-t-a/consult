@@ -13,7 +13,7 @@ def register_blueprints(app):
     from flask_musers.blueprints import auth
     app.register_blueprint(auth)
 
-    from staticpages.blueprints import staticpages
+    from staticpages.views import staticpages
     app.register_blueprint(staticpages)
 
     from dashboard.views import dashboard
