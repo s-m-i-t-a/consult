@@ -17,7 +17,4 @@ mongoengine==0.8.7
 pymongo==2.6
 Unipath==1.0
 six==1.6.1
-
-
-flask-cbv
-flask-musers
+flask-musers==0.0.7
