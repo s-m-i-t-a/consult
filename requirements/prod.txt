@@ -1,6 +1,6 @@
 # Everything that needed in production
 Flask==0.10.1
-Flask-WTF==0.10.2
+Flask-WTF==0.10.3
 Flask-Script==2.0.5
 Flask-Login==0.2.11
 Jinja2==2.7.3
